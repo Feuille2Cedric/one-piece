@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Emblème pirate au chapeau de paille">
+  <circle cx="64" cy="64" r="60" fill="#101b26" stroke="#f2b632" stroke-width="6"/>
+  <path d="M24 102 103 32M25 33l78 69" stroke="#f5efe2" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="64" cy="60" r="30" fill="#f5efe2" stroke="#101b26" stroke-width="4"/>
+  <path d="M42 77h44v17H42z" fill="#f5efe2" stroke="#101b26" stroke-width="4"/>
+  <circle cx="53" cy="59" r="6" fill="#101b26"/><circle cx="75" cy="59" r="6" fill="#101b26"/><path d="m64 66-6 10h12z" fill="#101b26"/>
+  <path d="M27 45c8-17 66-22 76 0-22 8-54 8-76 0z" fill="#f2b632" stroke="#101b26" stroke-width="4"/>
+  <path d="M43 20h42l8 24H35z" fill="#f2b632" stroke="#101b26" stroke-width="4"/><path d="M38 37h52" stroke="#d94736" stroke-width="7"/>
+</svg>

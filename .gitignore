@@ -1,0 +1,11 @@
+# Local deployment tools
+.tools/
+gh_*_windows_amd64.zip
+
+# Project-generation scripts and private working history
+tools/
+HISTORIQUE_PROMPTS.md
+
+# Python cache files
+__pycache__/
+*.py[cod]

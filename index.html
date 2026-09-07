@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b3341">
+  <meta name="description" content="Grand Line Quiz — 10 000 questions sur tout l’univers One Piece.">
+  <title>Grand Line Quiz — Le défi ultime</title>
+  <link rel="icon" href="assets/jolly-roger.svg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="polish.css">
+  <link rel="stylesheet" href="gameplay.css?v=21">
+  <link rel="stylesheet" href="one-piece.css?v=3">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"><span class="star s1"></span><span class="star s2"></span><span class="star s3"></span></div>
+  <header class="topbar">
+    <button class="brand" id="homeButton" aria-label="Retour à l'accueil">
+      <img src="assets/jolly-roger.svg" alt="" width="54" height="54">
+      <span><b>GRAND LINE</b><em>QUIZ</em></span>
+    </button>
+    <div class="top-actions">
+      <div class="streak" title="Meilleure série"><span>🔥</span><b id="bestStreak">0</b></div>
+      <button class="icon-btn" id="soundButton" aria-label="Activer ou couper le son">🔊</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="homeScreen" class="screen home-screen active">
+      <div class="hero-copy">
+        <p class="eyebrow">À LA CONQUÊTE DES MERS</p>
+        <h1>TESTE TON <span>HAKI</span></h1>
+        <p>10 000 questions à travers les personnages, arcs, îles, équipages et mystères de One Piece.</p>
+      </div>
+
+      <div class="mode-grid">
+        <button class="mode-card main-mode" data-mode="classic">
+          <span class="orb"><img src="assets/jolly-roger.svg" alt="Emblème pirate au chapeau de paille"></span>
+          <span class="mode-text"><small>DE 5 À 50 QUESTIONS</small><strong>LA ROUTE DE GRAND LINE</strong><em>Le quiz principal avec bonus et thèmes personnalisés</em></span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="mode-card" data-mode="speed">
+          <span class="mode-icon">⚡</span>
+          <span class="mode-text"><small>DUELS ÉCLAIR À 2 CHOIX</small><strong>GEAR RUSH</strong><em>Fais monter ton Gear avant la fin du temps</em></span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="mode-card" data-mode="survival">
+          <span class="mode-icon">♥</span>
+          <span class="mode-text"><small>12 ADVERSAIRES • CHOIX TACTIQUES</small><strong>GUERRE AU SOMMET</strong><em>Attaque, équilibre ou observation avant chaque duel</em></span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="mode-card" data-mode="daily">
+          <span class="mode-icon">◉</span>
+          <span class="mode-text"><small>7 ÎLES • DIFFICULTÉ ASCENDANTE</small><strong>LOG POSE DU JOUR</strong><em>Le même itinéraire quotidien jusqu’au niveau impossible</em></span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="mode-card special-mode" data-mode="truefalse">
+          <span class="mode-icon">⚖️</span>
+          <span class="mode-text"><small>15 AFFIRMATIONS • 3 ERREURS MAXIMUM</small><strong>DEN DEN VRAI / FAUX</strong><em>Confirme ou rejette les messages reçus</em></span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="mode-card special-mode" data-mode="memory">
+          <span class="mode-icon">🧠</span>
+          <span class="mode-text"><small>JEU DE MÉMOIRE 1V1</small><strong>MEMORY DU SUNNY</strong><em>Associe chaque indice à sa réponse</em></span>
+          <span class="arrow">›</span>
+        </button>
+      </div>
+
+      <div class="stats-panel">
+        <div><b id="gamesStat">0</b><span>PARTIES</span></div>
+        <div><b id="correctStat">0%</b><span>RÉUSSITE</span></div>
+        <div><b id="rankStat">Mousse</b><span>RANG</span></div>
+      </div>
+      <div class="rank-progress"><div><span id="rankLevel">RANG 1 • MOUSSE</span><b id="rankProgressText">0 / 1 500 XP</b></div><div class="rank-track"><i id="rankProgressBar"></i></div><small id="rankNext">Prochain rang : Matelot</small></div>
+      <button class="leaderboard-link" id="leaderboardButton"><span>🏆</span><b>CLASSEMENT GRAND LINE</b><small>Voir le Top 10 local</small><i>›</i></button>
+    </section>
+
+    <section id="leaderboardScreen" class="screen leaderboard-screen">
+      <button class="back-btn" data-back>← Retour</button>
+      <div class="panel leaderboard-panel classic-leaderboard" aria-labelledby="classicLeaderboardTitle">
+        <div class="leaderboard-heading"><span>🏆 CLASSEMENT LOCAL</span><h2 id="classicLeaderboardTitle">Route de Grand Line — Top 10</h2></div>
+        <p>Chaque difficulté possède son propre Top 10. « Toutes » rassemble toutes les parties, tandis que les quatre autres tableaux ne comparent que des parcours de même niveau.</p>
+        <div class="leaderboard-tabs" role="tablist" aria-label="Difficulté du classement">
+          <button class="selected" data-leaderboard="all" role="tab">Toutes</button>
+          <button data-leaderboard="facile" role="tab">Facile</button>
+          <button data-leaderboard="moyen" role="tab">Moyen</button>
+          <button data-leaderboard="difficile" role="tab">Difficile</button>
+          <button data-leaderboard="impossible" role="tab">Impossible</button>
+        </div>
+        <ol id="classicLeaderboard"><li class="empty">Termine une Route de Grand Line pour ouvrir le classement.</li></ol>
+      </div>
+    </section>
+
+    <section id="setupScreen" class="screen setup-screen">
+      <button class="back-btn" data-back>← Retour</button>
+      <div class="panel setup-panel">
+        <p class="eyebrow">PRÉPARE TON COMBAT</p>
+        <h2 id="setupTitle">Quiz classique</h2>
+        <label class="field-label" id="difficultyLabel">Difficulté</label>
+        <div class="segmented" id="difficultyPicker">
+          <button data-difficulty="all" class="selected">Toutes</button>
+          <button data-difficulty="facile">Facile</button>
+          <button data-difficulty="moyen">Moyen</button>
+          <button data-difficulty="difficile">Difficile</button>
+          <button data-difficulty="impossible">Impossible</button>
+        </div>
+        <p class="memory-difficulty-hint hidden" id="memoryDifficultyHint"></p>
+        <label class="field-label" id="questionCountLabel">Nombre de questions</label>
+        <div class="question-count-picker" id="questionCountPicker">
+          <div class="question-count-value"><b id="questionCountValue">10</b><span>QUESTIONS</span></div>
+          <div class="kamehameha-stage">
+            <img src="assets/luffy-gum-gum-slider-v2.png" alt="" aria-hidden="true">
+            <div class="kamehameha-beam">
+              <input id="questionCountRange" type="range" min="5" max="50" step="5" value="10" style="--beam-power:11.111%" aria-label="Allonge du poing : nombre de questions">
+              <div class="question-count-scale" aria-hidden="true"><span>5</span><span>25</span><span>50</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-heading"><label class="field-label">Univers</label><div><button type="button" id="selectAllCategories">Tout sélectionner</button><button type="button" id="clearCategories">Tout retirer</button></div></div>
+        <div class="category-grid" id="categoryPicker"></div>
+        <button type="button" class="reset-filters" id="resetFilters">↺ Réinitialiser les choix</button>
+        <button class="primary-btn" id="startButton">COMMENCER <span>›</span></button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen">
+      <div class="game-head">
+        <button class="icon-btn quit-btn" id="quitButton" aria-label="Quitter">✕</button>
+        <div class="progress-wrap"><div class="progress-meta"><span id="questionNumber">QUESTION 1/10</span><span id="scoreLabel">0 POINT</span></div><div class="progress"><i id="progressBar"></i></div></div>
+        <div class="timer" id="timer">∞</div>
+      </div>
+      <div class="mode-objective" id="modeObjective"></div>
+      <div class="mode-status" id="modeStatus" aria-live="polite"></div>
+      <div class="panel question-panel">
+        <div class="question-tags"><span id="categoryTag">Histoire</span><span id="difficultyTag">MOYEN</span></div>
+        <div id="imagePrompt" class="image-prompt hidden"><img id="questionImage" src="" alt="Indice visuel"></div>
+        <h2 id="questionText"></h2>
+        <div id="answers" class="answers"></div>
+        <div class="powerups" id="powerups"><button id="fiftyButton" title="Retire deux mauvaises réponses">👁️ Haki de l’observation <b>1</b></button><button id="skipButton" title="Passe sans perdre ta série">🌊 Coup de vent <b>1</b></button><button id="doubleKiButton" title="Double les points de la prochaine réponse">🔥 Haki royal <b>1</b></button></div>
+        <div id="explanation" class="explanation" aria-live="polite"></div>
+        <button class="primary-btn next-btn hidden" id="nextButton">QUESTION SUIVANTE <span>›</span></button>
+      </div>
+      <div class="lives" id="lives"></div>
+    </section>
+
+    <section id="memoryScreen" class="screen memory-screen">
+      <div class="game-head">
+        <button class="icon-btn quit-btn" id="memoryQuitButton" aria-label="Quitter">✕</button>
+        <div class="progress-wrap"><div class="progress-meta"><span>CAPSULE MEMORY</span><span id="memoryMoves">0 COUP</span></div><div class="progress"><i id="memoryProgress"></i></div></div>
+        <div class="timer" id="memoryTimer">0s</div>
+      </div>
+      <div class="mode-objective" id="memoryObjective">Retourne deux cartes et associe chaque indice One Piece à sa réponse.</div>
+      <div class="duel-board" id="duelBoard">
+        <div class="duelist active" id="playerOne"><span>JOUEUR 1</span><b id="playerOneScore">0</b></div>
+        <div class="turn-indicator" id="turnIndicator">Tour du Joueur 1</div>
+        <div class="duelist" id="playerTwo"><span>JOUEUR 2</span><b id="playerTwoScore">0</b></div>
+      </div>
+      <div class="memory-grid" id="memoryGrid"></div>
+    </section>
+
+    <section id="resultScreen" class="screen result-screen">
+      <div class="panel result-panel">
+        <div class="result-orb">★</div>
+        <p class="eyebrow">COMBAT TERMINÉ</p>
+        <h2 id="resultTitle">Bien joué !</h2>
+        <p id="resultMessage"></p>
+        <div class="result-score"><b id="finalScore">0</b><span>POINTS</span><em id="xpEarned">+0 XP</em></div>
+        <div class="result-details"><div><b id="finalCorrect">0/0</b><span id="finalCorrectLabel">BONNES RÉPONSES</span></div><div><b id="finalAccuracy">0%</b><span id="finalAccuracyLabel">PRÉCISION</span></div><div><b id="finalStreak">0</b><span id="finalStreakLabel">MEILLEURE SÉRIE</span></div></div>
+        <div class="classic-placement hidden" id="classicPlacement"></div>
+        <button class="primary-btn" id="replayButton">REJOUER</button>
+        <button class="secondary-btn" id="resultHomeButton">RETOUR À L'ACCUEIL</button>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>GRAND LINE QUIZ</span><b>10 000</b> QUESTIONS • PROGRESSION LOCALE</footer>
+  <script src="wiki-bank.js?v=4"></script>
+  <script src="questions.js?v=3"></script>
+  <script src="app.js?v=1"></script>
+</body>
+</html>
