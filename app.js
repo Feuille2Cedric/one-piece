@@ -40,6 +40,23 @@
   function shuffle(arr,random=Math.random){for(let i=arr.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
   function answerKey(question){return normalizeEntity(String(question.answer||"").replace(/\s*\([^)]*\)\s*$/,""))}
   function uniqueAnswerPool(pool,random=Math.random){const seen=new Set;return shuffle(pool.slice(),random).filter(question=>{const key=answerKey(question);if(!key||seen.has(key))return false;seen.add(key);return true})}
+  function historyFamily(question){const prompt=normalizeEntity(question.question);if(/^qui\b/.test(prompt)||prompt.includes("quel personnage"))return"Personnages";if(prompt.includes("quel lieu"))return"Lieux";if(prompt.includes("quel groupe"))return"Groupes";if(prompt.includes("quel element"))return"Éléments";return"Événements"}
+  function balancedQuestions(pool,count,random=Math.random){
+    const categories=new Map;
+    pool.forEach(question=>{const category=question.category,family=category==="Histoire"?historyFamily(question):category;if(!categories.has(category))categories.set(category,new Map);const families=categories.get(category);if(!families.has(family))families.set(family,[]);families.get(family).push(question)});
+    const categoryOrder=shuffle([...categories.keys()],random),familyOrders=new Map,positions=new Map;
+    categories.forEach((families,category)=>{families.forEach(bucket=>shuffle(bucket,random));familyOrders.set(category,shuffle([...families.keys()],random));positions.set(category,0)});
+    const selected=[];
+    while(selected.length<count){
+      const active=shuffle(categoryOrder.filter(category=>[...categories.get(category).values()].some(bucket=>bucket.length)).slice(),random);if(!active.length)break;
+      for(const category of active){
+        const families=categories.get(category),order=familyOrders.get(category);let position=positions.get(category),picked=null;
+        for(let offset=0;offset<order.length;offset++){const index=(position+offset)%order.length,bucket=families.get(order[index]);if(bucket.length){picked=bucket.pop();positions.set(category,(index+1)%order.length);break}}
+        if(picked)selected.push(picked);if(selected.length===count)break;
+      }
+    }
+    return selected;
+  }
   function levelQuestion(question,level=question.difficulty){return question.difficulty===level}
   function calibratedQuestion(question,level,random=Math.random){const wrong=shuffle(question.options.filter(option=>option!==question.answer),random).slice(0,3);return{...question,difficulty:level,options:shuffle([question.answer,...wrong],random)}}
   function updateMemoryDifficulty(){const config=memoryLevels[state.difficulty]||memoryLevels.all,hint=$("#memoryDifficultyHint");hint.classList.toggle("hidden",state.mode!=="memory");hint.textContent=`${config.label} • ${config.pairs*2} tuiles (${config.pairs} paires) • ${config.points} points de base par paire`}
@@ -48,8 +65,7 @@
   function setAllCategories(selected){state.categories.clear();$$('#categoryPicker [data-category]').forEach(button=>{button.classList.toggle("selected",selected);if(selected)state.categories.add(button.dataset.category)})}
   function setQuestionCount(value){state.questionCount=Math.max(5,Math.min(50,Number(value)||10));const range=$("#questionCountRange");range.value=String(state.questionCount);range.style.setProperty("--beam-power",`${(state.questionCount-5)/45*100}%`);$("#questionCountValue").textContent=String(state.questionCount)}
   function resetSetupFilters(){state.difficulty="all";setQuestionCount(10);$$('[data-difficulty]').forEach(button=>button.classList.toggle("selected",button.dataset.difficulty==="all"));setAllCategories(true);updateMemoryDifficulty()}
-  function ladder(pool,plan,random){const selected=[],used=new Set;Object.entries(plan).forEach(([difficulty,count])=>{const candidates=difficulty==="facile"||difficulty==="moyen"?pool.filter(q=>levelQuestion(q,difficulty)).map(q=>calibratedQuestion(q,difficulty,random)):pool.filter(q=>q.difficulty===difficulty);const chosen=shuffle(candidates.filter(q=>!used.has(q.signature)),random).slice(0,count);chosen.forEach(q=>used.add(q.signature));selected.push(...chosen)});if(selected.length<Object.values(plan).reduce((sum,count)=>sum+count,0))selected.push(...shuffle(pool.filter(q=>!used.has(q.signature)),random).slice(0,Object.values(plan).reduce((sum,count)=>sum+count,0)-selected.length));return selected}
-  function storyMix(pool,count,random){const stories=shuffle(pool.filter(q=>q.category==="Histoire").slice(),random),others=shuffle(pool.filter(q=>q.category!=="Histoire").slice(),random),wanted=Math.min(4,stories.length,count),selected=[...stories.slice(0,wanted),...others.slice(0,count-wanted)];if(selected.length<count)selected.push(...stories.slice(wanted,wanted+count-selected.length));return shuffle(selected,random)}
+  function ladder(pool,plan,random){const selected=[],used=new Set;Object.entries(plan).forEach(([difficulty,count])=>{const candidates=difficulty==="facile"||difficulty==="moyen"?pool.filter(q=>levelQuestion(q,difficulty)).map(q=>calibratedQuestion(q,difficulty,random)):pool.filter(q=>q.difficulty===difficulty);const chosen=balancedQuestions(candidates.filter(q=>!used.has(q.signature)),count,random);chosen.forEach(q=>used.add(q.signature));selected.push(...chosen)});const target=Object.values(plan).reduce((sum,count)=>sum+count,0);if(selected.length<target)selected.push(...balancedQuestions(pool.filter(q=>!used.has(q.signature)),target-selected.length,random));return selected}
   function speedQuestion(q,random){const wrong=q.options.filter(option=>option!==q.answer),options=shuffle([q.answer,wrong[Math.floor(random()*wrong.length)]],random);return{...q,options,explanation:`Réponse éclair : ${q.answer}.`}}
   function scouterQuestion(q,random){const truthful=random()>=.5,wrong=q.options.filter(option=>option!==q.answer),claim=truthful?q.answer:wrong[Math.floor(random()*wrong.length)];return{...q,question:`Le Den Den Mushi annonce « ${claim} » pour répondre à : ${q.question}`,answer:truthful?"Vrai":"Faux",options:random()>.5?["Vrai","Faux"]:["Faux","Vrai"],explanation:truthful?`Message confirmé : ${q.answer}.`:`Message rejeté : la réponse correcte était ${q.answer}.`,image:null,revealCaption:q.answer}}
   function start(){
@@ -64,9 +80,9 @@
     let selected;
     if(state.mode==="daily")selected=ladder(pool,{facile:2,moyen:2,difficile:2,impossible:1},random);
     else if(state.mode==="survival")selected=ladder(pool,{facile:3,moyen:3,difficile:3,impossible:3},random);
-    else if(state.mode==="speed")selected=shuffle(pool.slice(),random).slice(0,Math.min(200,pool.length)).map(q=>speedQuestion(q,random));
-    else if(state.mode==="truefalse")selected=shuffle(pool.slice(),random).slice(0,Math.min(15,pool.length)).map(q=>scouterQuestion(q,random));
-    else selected=storyMix(pool,state.questionCount,random);
+    else if(state.mode==="speed")selected=balancedQuestions(pool,Math.min(200,pool.length),random).map(q=>speedQuestion(q,random));
+    else if(state.mode==="truefalse")selected=balancedQuestions(pool,Math.min(15,pool.length),random).map(q=>scouterQuestion(q,random));
+    else selected=balancedQuestions(pool,state.questionCount,random);
     Object.assign(state,{questions:selected,index:0,score:0,correct:0,streak:0,bestRun:0,lives:state.mode==="survival"?5:3,remaining:60,locked:false,usedFifty:false,usedSkip:false,usedDoubleKi:false,doubleKi:false,xpEarned:0,questionStartedAt:0,classicSpeedBonus:0,classicLastSpeedBonus:0,classicLastSeconds:0,classicPlacement:0,classicDifficultyPlacement:0,tournamentTactic:null,kaiokenLevel:1});
     $("#lives").classList.toggle("hidden",!["survival","daily","truefalse"].includes(state.mode));$("#modeObjective").textContent=state.mode==="classic"?`${state.questionCount} questions • trois bonus • construis la meilleure série.`:modeObjectives[state.mode];updatePowerups();
     $("#powerups").classList.toggle("hidden",state.mode!=="classic");clearInterval(state.timer);clearInterval(state.questionClock);state.questionClock=null;if(state.mode==="speed")state.timer=setInterval(()=>{state.remaining--;tickTimer();if(state.remaining<=0)finish()},1000);
@@ -118,7 +134,7 @@
     const memoryPool=uniqueAnswerPool(pool);
     const imageQuestions=shuffle(memoryPool.filter(q=>q.image).slice());
     const compactQuestions=memoryPool.filter(q=>!q.image&&q.question.length<=170&&q.answer.length<=70);
-    const textQuestions=shuffle((compactQuestions.length>=config.pairs?compactQuestions:memoryPool.filter(q=>!q.image)).slice());
+    const textSource=compactQuestions.length>=config.pairs?compactQuestions:memoryPool.filter(q=>!q.image),textQuestions=balancedQuestions(textSource,textSource.length);
     const imageCount=Math.min(imageQuestions.length,config.pairs>=8?3:2);
     const pairs=[...imageQuestions.slice(0,imageCount),...textQuestions.slice(0,config.pairs-imageCount)];
     if(pairs.length<config.pairs){alert(`Le niveau ${config.label} exige ${config.pairs} paires (${config.pairs*2} tuiles). Sélectionne davantage de catégories.`);return}
